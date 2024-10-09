@@ -12,7 +12,6 @@ class PygameRenderer:
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.clock = pygame.time.Clock()
         self.running = True
-        self.error = False
 
     def tick(self, board, halted=False):
         if not self.running: return
@@ -39,9 +38,6 @@ class PygameRenderer:
         if keys[pygame.K_KP7]: return (0, 0)
         if keys[pygame.K_KP8]: return (1, 0)
         if keys[pygame.K_KP9]: return (2, 0)
-
-    def invalid_position(self, type_):
-        self.error = type_
 
     def render_board(self):
         self.screen.fill("black")
@@ -93,7 +89,7 @@ class PygameRenderer:
                             [base_x + 2*self.padding, base_y + cell_height - 2*self.padding], 3)
                 elif char == PlayerChars.PLAYER_O:
                     radius = min(cell_width // 2, cell_height // 2) - 2*self.padding
-                    pygame.draw.circle(self.screen, "blue",
+                    pygame.draw.circle(self.screen, "red",
             [base_x + (cell_width // 2), base_y + (cell_height // 2)], radius, 3)
                 elif char == " ": pass
                 else:

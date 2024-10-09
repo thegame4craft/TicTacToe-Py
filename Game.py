@@ -23,7 +23,7 @@ class Game:
                     self.field.place(ic_x, ic_y, current_player)
                     current_player = PlayerChars.PLAYER_O if current_player == PlayerChars.PLAYER_X else PlayerChars.PLAYER_X
 
-            self.renderer.tick(self.field.board)
+            self.renderer.tick(self.field.get_board())
             b = self.field.board
             if b[0] == b[1] and b[1] == b[2] and b[0] != " " and b[1] != " " and b[2] != " ":
                 self.renderer.draw_winner(0, 0, 2, 0)
@@ -53,5 +53,5 @@ class Game:
         self.renderer.stop()
 
 if __name__ == "__main__":
-    _ = Game()
-    _.loop()
+    g = Game()
+    g.loop()
