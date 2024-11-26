@@ -1,4 +1,6 @@
 import pygame
+
+from Field import Field
 from PlayerChars import PlayerChars
 
 class PygameRenderer:
@@ -72,6 +74,12 @@ class PygameRenderer:
 
         pygame.draw.line(self.screen, "green", [from_x, from_y], [to_x, to_y], 12)
 
+    def render_text_center(self, text:str, color="white") -> None:
+        font = pygame.font.Font(None, 120)
+        text = font.render(text, True, color)
+        rect = text.get_rect(center=(self.width / 2, self.height / 2))
+        self.screen.blit(text, rect)
+
     def render_players(self, board:list[str]) -> None:
         cell_width = (self.width - 2*self.padding) / 3 
         cell_height = (self.height - 2*self.padding) / 3 
@@ -91,7 +99,7 @@ class PygameRenderer:
                     radius = min(cell_width // 2, cell_height // 2) - 2*self.padding
                     pygame.draw.circle(self.screen, "red",
             [base_x + (cell_width // 2), base_y + (cell_height // 2)], radius, 3)
-                elif char == " ": pass
+                elif char == Field.EMPTY_CHAR: pass
                 else:
                     raise Exception(f"Undefined behaviour {char=}")
         

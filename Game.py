@@ -1,4 +1,9 @@
+import random
+
+from pygame.examples.grid import Player
+
 from Field import Field
+from MiniMax import MiniMax
 from PygameRenderer import PygameRenderer
 from PlayerChars import PlayerChars
 
@@ -7,50 +12,54 @@ class Game:
         self.field = Field()
         self.halted = False
         self.renderer = PygameRenderer()
+        self.player = PlayerChars.select_random_player()
+        self.ki = MiniMax(self.field, PlayerChars.get_opponent(self.player))
 
     def loop(self):
         self.renderer.start()
-        current_player = PlayerChars.PLAYER_X 
+        current_player = self.player # Player always starts
         while self.renderer.running:
             if self.halted: 
                 self.renderer.tick([], True)
                 continue
 
-            input_coord = self.renderer.get_input_position()
+
+            if current_player == self.ki.player:
+                _,tree = self.ki.build_tree(current_player)
+                rate = self.ki.rate_tree(tree)
+                if rate == 0:
+                    x,y = random.choice(self.field.get_empty_positions())
+                    input_coord = (x, y)
+                else:
+                    input_coord = None
+                    pass
+                    x, y = random.choice(self.field.get_empty_positions())
+                    input_coord = (x, y)
+            elif current_player == self.player:
+                input_coord = self.renderer.get_input_position()
+            else:
+                raise Exception("Invalid player")
+
             if input_coord is not None:
                 ic_x, ic_y = input_coord
-                if self.field.get_char(ic_x, ic_y) == " ":
+                if self.field.get_char(ic_x, ic_y) == Field.EMPTY_CHAR:
                     self.field.place(ic_x, ic_y, current_player)
-                    current_player = PlayerChars.PLAYER_O if current_player == PlayerChars.PLAYER_X else PlayerChars.PLAYER_X
+                    current_player = PlayerChars.get_opponent(current_player)
 
             self.renderer.tick(self.field.get_board())
-            b = self.field.get_board()
-            if b[0] == b[1] and b[1] == b[2] and b[0] != " " and b[1] != " " and b[2] != " ":
-                self.renderer.draw_winner(0, 0, 2, 0)
+            win, from_x, from_y, to_x, to_y = self.field.is_win(current_player)
+            if win:
                 self.halted = True
-            elif b[3] == b[4] and b[4] == b[5] and b[3] != " " and b[4] != " " and b[5] != " ":
-                self.renderer.draw_winner(0, 1, 2, 1)    
+                self.renderer.draw_winner(from_x, from_y, to_x, to_y)
+                self.renderer.render_text_center(f"{PlayerChars.get_opponent(current_player)} wins!")
+
+            elif not self.field.has_empty():
                 self.halted = True
-            elif b[6] == b[7] and b[7] == b[6] and b[6] != " " and b[7] != " " and b[8] != " ":               
-                self.renderer.draw_winner(0, 2, 2, 2)    
-                self.halted = True
-            elif b[0] == b[3] and b[3] == b[6] and b[0] != " " and b[3] != " " and b[6] != " ":            
-                self.renderer.draw_winner(0, 0, 0, 2)    
-                self.halted = True
-            elif b[1] == b[4] and b[4] == b[7] and b[1] != " " and b[4] != " " and b[7] != " ":
-                self.renderer.draw_winner(1, 0, 1, 2)    
-                self.halted = True
-            elif b[2] == b[5] and b[5] == b[8] and b[2] != " " and b[5] != " " and b[8] != " ":        
-                self.renderer.draw_winner(2, 0, 2, 2)    
-                self.halted = True
-            elif b[0] == b[4] and b[4] == b[8] and b[0] != " " and b[4] != " " and b[8] != " ":
-                self.renderer.draw_winner(0, 0, 2, 2)    
-                self.halted = True
-            elif b[2] == b[4] and b[4] == b[6] and b[2] != " " and b[4] != " " and b[2] != " ":
-                self.renderer.draw_winner(2, 0, 0, 2)    
-                self.halted = True
+                self.renderer.render_text_center("Draw!")
 
         self.renderer.stop()
+
+
 
 if __name__ == "__main__":
     g = Game()
