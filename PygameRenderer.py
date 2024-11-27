@@ -13,6 +13,7 @@ class PygameRenderer:
         self.padding = 20
         self.text = None
         pygame.init()
+        self.human_player = None
 
     def start(self):
         self.screen = pygame.display.set_mode((self.width, self.height))
@@ -35,20 +36,8 @@ class PygameRenderer:
         pygame.display.flip()
         self.clock.tick(60)
 
-
-    def get_input_position(self):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_KP1]: return (0, 2)
-        if keys[pygame.K_KP2]: return (1, 2)
-        if keys[pygame.K_KP3]: return (2, 2)
-        if keys[pygame.K_KP4]: return (0, 1)
-        if keys[pygame.K_KP5]: return (1, 1)
-        if keys[pygame.K_KP6]: return (2, 1)
-        if keys[pygame.K_KP7]: return (0, 0)
-        if keys[pygame.K_KP8]: return (1, 0)
-        if keys[pygame.K_KP9]: return (2, 0)
-
-    def pull_reset(self):
+    @staticmethod
+    def pull_reset():
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE]: return True
         return False
@@ -62,25 +51,33 @@ class PygameRenderer:
         text = font.render(str(int(self.clock.get_fps())), True, TEXT_COLOR)
         self.screen.blit(text, (self.width - 50, 10))
 
+        # draw small X or O in the top right corner
+        if self.human_player == PlayerChars.PLAYER_X:
+            pygame.draw.line(self.screen, X_COLOR, [50, 50], [10, 10], 8)
+            pygame.draw.line(self.screen, X_COLOR, [50, 10], [10, 50], 8)
+        elif self.human_player == PlayerChars.PLAYER_O:
+            pygame.draw.circle(self.screen, O_COLOR, [30, 30], 20, 8)
+
+
         
-        onecell_w = (self.width - 2*self.padding) / 3
-        onecell_h = (self.height - 2*self.padding) / 3
+        one_cell_w = (self.width - 2*self.padding) / 3
+        one_cell_h = (self.height - 2*self.padding) / 3
         
         pygame.draw.line(self.screen, INNER_LINE_COLOR,
-                [onecell_w + self.padding, self.padding],
-                [onecell_w+ self.padding, self.height - 2*self.padding], INNER_LINE_STROKE)
+                [one_cell_w + self.padding, self.padding],
+                [one_cell_w+ self.padding, self.height - 2*self.padding], INNER_LINE_STROKE)
         
         pygame.draw.line(self.screen, INNER_LINE_COLOR,
-                [onecell_w*2 + self.padding, self.padding],
-                [onecell_w*2 + self.padding, self.height - 2*self.padding], INNER_LINE_STROKE)
+                [one_cell_w*2 + self.padding, self.padding],
+                [one_cell_w*2 + self.padding, self.height - 2*self.padding], INNER_LINE_STROKE)
         
         pygame.draw.line(self.screen, INNER_LINE_COLOR,
-                [self.padding, onecell_h + self.padding], 
-                [self.width - 2*self.padding, onecell_h + self.padding], INNER_LINE_STROKE)
+                [self.padding, one_cell_h + self.padding],
+                [self.width - 2*self.padding, one_cell_h + self.padding], INNER_LINE_STROKE)
 
         pygame.draw.line(self.screen, INNER_LINE_COLOR,
-                [self.padding, onecell_h*2 + self.padding], 
-                [self.width - 2*self.padding, onecell_h*2 + self.padding], INNER_LINE_STROKE)
+                [self.padding, one_cell_h*2 + self.padding],
+                [self.width - 2*self.padding, one_cell_h*2 + self.padding], INNER_LINE_STROKE)
 
     def draw_winner(self, from_x, from_y, to_x, to_y):
         cell_width = (self.width - 2*self.padding) / 3
@@ -126,6 +123,20 @@ class PygameRenderer:
                     raise Exception(f"Undefined behaviour {char=}")
         
 
-    def stop(self):
+    @staticmethod
+    def stop():
         pygame.quit()
+
+    @staticmethod
+    def get_input_position():
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_KP1]: return 0, 2
+        if keys[pygame.K_KP2]: return 1, 2
+        if keys[pygame.K_KP3]: return 2, 2
+        if keys[pygame.K_KP4]: return 0, 1
+        if keys[pygame.K_KP5]: return 1, 1
+        if keys[pygame.K_KP6]: return 2, 1
+        if keys[pygame.K_KP7]: return 0, 0
+        if keys[pygame.K_KP8]: return 1, 0
+        if keys[pygame.K_KP9]: return 2, 0
 
