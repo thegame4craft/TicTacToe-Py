@@ -2,12 +2,16 @@ import pygame
 
 from Field import Field
 from PlayerChars import PlayerChars
+from colors import BACKGROUND_COLOR, INNER_LINE_COLOR, WINNER_LINE_COLOR, TEXT_COLOR, X_COLOR, O_COLOR, \
+    INNER_LINE_STROKE, PLAYER_STROKE
+
 
 class PygameRenderer:
     def __init__(self):
         self.width = 640
         self.height = 900
         self.padding = 20
+        self.text = None
         pygame.init()
 
     def start(self):
@@ -25,6 +29,9 @@ class PygameRenderer:
         if not halted:
             self.render_board()
             self.render_players(board)
+
+
+    def update_display(self):
         pygame.display.flip()
         self.clock.tick(60)
 
@@ -41,27 +48,39 @@ class PygameRenderer:
         if keys[pygame.K_KP8]: return (1, 0)
         if keys[pygame.K_KP9]: return (2, 0)
 
+    def pull_reset(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE]: return True
+        return False
+
+
     def render_board(self):
-        self.screen.fill("black")
+        self.screen.fill(BACKGROUND_COLOR)
+
+        # fps in the top right corner
+        font = pygame.font.Font(None, 36)
+        text = font.render(str(int(self.clock.get_fps())), True, TEXT_COLOR)
+        self.screen.blit(text, (self.width - 50, 10))
+
         
         onecell_w = (self.width - 2*self.padding) / 3
         onecell_h = (self.height - 2*self.padding) / 3
         
-        pygame.draw.line(self.screen, "white", 
+        pygame.draw.line(self.screen, INNER_LINE_COLOR,
                 [onecell_w + self.padding, self.padding],
-                [onecell_w+ self.padding, self.height - 2*self.padding], 3)
+                [onecell_w+ self.padding, self.height - 2*self.padding], INNER_LINE_STROKE)
         
-        pygame.draw.line(self.screen, "white", 
+        pygame.draw.line(self.screen, INNER_LINE_COLOR,
                 [onecell_w*2 + self.padding, self.padding],
-                [onecell_w*2 + self.padding, self.height - 2*self.padding], 3)
+                [onecell_w*2 + self.padding, self.height - 2*self.padding], INNER_LINE_STROKE)
         
-        pygame.draw.line(self.screen, "white",
+        pygame.draw.line(self.screen, INNER_LINE_COLOR,
                 [self.padding, onecell_h + self.padding], 
-                [self.width - 2*self.padding, onecell_h + self.padding], 3)
+                [self.width - 2*self.padding, onecell_h + self.padding], INNER_LINE_STROKE)
 
-        pygame.draw.line(self.screen, "white",
+        pygame.draw.line(self.screen, INNER_LINE_COLOR,
                 [self.padding, onecell_h*2 + self.padding], 
-                [self.width - 2*self.padding, onecell_h*2 + self.padding], 3)
+                [self.width - 2*self.padding, onecell_h*2 + self.padding], INNER_LINE_STROKE)
 
     def draw_winner(self, from_x, from_y, to_x, to_y):
         cell_width = (self.width - 2*self.padding) / 3
@@ -72,13 +91,16 @@ class PygameRenderer:
         to_x = self.padding + cell_width * (to_x + 0.5)
         to_y = self.padding + cell_height * (to_y + 0.5)
 
-        pygame.draw.line(self.screen, "green", [from_x, from_y], [to_x, to_y], 12)
+        pygame.draw.line(self.screen, WINNER_LINE_COLOR, [from_x, from_y], [to_x, to_y], 12)
 
-    def render_text_center(self, text:str, color="white") -> None:
+    def render_text_center(self, text:str, color=TEXT_COLOR) -> None:
+        y = self.height // 2 - (len(text.split("\n")) * 150) // 4
         font = pygame.font.Font(None, 120)
-        text = font.render(text, True, color)
-        rect = text.get_rect(center=(self.width / 2, self.height / 2))
-        self.screen.blit(text, rect)
+        for line in text.split("\n"):
+            text = font.render(line, True, color)
+            rect = text.get_rect(center=(self.width / 2, y))
+            y += 150
+            self.screen.blit(text, rect)
 
     def render_players(self, board:list[str]) -> None:
         cell_width = (self.width - 2*self.padding) / 3 
@@ -90,15 +112,15 @@ class PygameRenderer:
                 base_y = self.padding + cell_height * y
                 
                 if char == PlayerChars.PLAYER_X:
-                    pygame.draw.line(self.screen, "blue", [base_x + 2*self.padding, base_y + 2*self.padding],
-                            [base_x + cell_width - 2*self.padding, base_y + cell_height - 2*self.padding], 3)
-                    pygame.draw.line(self.screen, "blue", 
+                    pygame.draw.line(self.screen, X_COLOR, [base_x + 2*self.padding, base_y + 2*self.padding],
+                            [base_x + cell_width - 2*self.padding, base_y + cell_height - 2*self.padding], PLAYER_STROKE)
+                    pygame.draw.line(self.screen, X_COLOR,
                             [base_x + cell_width - 2*self.padding, base_y + 2*self.padding], 
-                            [base_x + 2*self.padding, base_y + cell_height - 2*self.padding], 3)
+                            [base_x + 2*self.padding, base_y + cell_height - 2*self.padding], PLAYER_STROKE)
                 elif char == PlayerChars.PLAYER_O:
                     radius = min(cell_width // 2, cell_height // 2) - 2*self.padding
-                    pygame.draw.circle(self.screen, "red",
-            [base_x + (cell_width // 2), base_y + (cell_height // 2)], radius, 3)
+                    pygame.draw.circle(self.screen, O_COLOR,
+            [base_x + (cell_width // 2), base_y + (cell_height // 2)], radius, PLAYER_STROKE)
                 elif char == Field.EMPTY_CHAR: pass
                 else:
                     raise Exception(f"Undefined behaviour {char=}")

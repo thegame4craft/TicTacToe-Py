@@ -30,6 +30,10 @@ class Field:
 
     def is_win(self, player) -> tuple[bool, int, int, int, int]:
         board = self.get_board()
+        return self.is_win_static(board, player)
+    
+    @staticmethod
+    def is_win_static(board, player):
         _combinations = [
             [0, 1, 2],
             [3, 4, 5],
@@ -49,6 +53,7 @@ class Field:
                 return True, start_x, start_y, end_x, end_y
 
         return False, 0, 0, 0, 0
+
 
     @staticmethod
     def board_idx_to_xy(idx: int) -> tuple[int, int]:
