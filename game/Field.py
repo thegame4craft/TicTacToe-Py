@@ -52,7 +52,7 @@ class Field:
                 end_x, end_y = Field.board_idx_to_xy(c[2])
                 return True, start_x, start_y, end_x, end_y
 
-        return False, 0, 0, 0, 0
+        return False, -1, -1, -1, -1
 
 
     @staticmethod
